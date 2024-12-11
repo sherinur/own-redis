@@ -2,11 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"net"
 	"os"
 	"strconv"
-	"strings"
 
 	. "own-redis/internal"
 )
@@ -20,33 +17,38 @@ func init() {
 
 func main() {
 	flag.Parse()
+	port := "0.0.0.0:" + strconv.Itoa(portInt)
 
-	port := ":" + strconv.Itoa(portInt)
+	cfg := &Config{Port: port}
 
-	conn, err := net.ListenPacket("udp", port)
+	server := NewServer(cfg)
+
+	err := server.Start()
 	if err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer conn.Close()
+	// conn, err := net.ListenPacket("udp", port)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
+	// defer conn.Close()
 
-	fmt.Printf("Own Redis is started and listening on %s\n", port[1:])
+	// for {
+	// 	buffer := make([]byte, 1024)
 
-	for {
-		buffer := make([]byte, 1024)
+	// 	n, addr, err := conn.ReadFrom(buffer)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		continue
+	// 	}
 
-		n, addr, err := conn.ReadFrom(buffer)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		fmt.Println(strings.ToLower(string(buffer[:n])))
-		if strings.ToLower(string(buffer[:n])) == "ping\n" {
-			_, err = conn.WriteTo([]byte("PONG\n"), addr)
-			if err != nil {
-				fmt.Println(err)
-			}
-		}
-	}
+	// 	fmt.Println(strings.ToLower(string(buffer[:n])))
+	// 	if strings.ToLower(string(buffer[:n])) == "ping\n" {
+	// 		_, err = conn.WriteTo([]byte("PONG\n"), addr)
+	// 		if err != nil {
+	// 			fmt.Println(err)
+	// 		}
+	// 	}
+	// }
 }
